@@ -16,10 +16,8 @@ import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { SignupSchema } from '@/helpers/zod/signup-schema'
 import { signUp } from '@/lib/auth-client'
-import { useRouter } from 'next/navigation'
 
 const SignUp = () => {
-    const router = useRouter()
     const { error, success, loading, setLoading, setError, setSuccess, resetState } = useAuthState();
 
     const form = useForm<z.infer<typeof SignupSchema>>({
@@ -37,6 +35,7 @@ const SignUp = () => {
                 name: values.name,
                 email: values.email,
                 password: values.password,
+                callbackURL:'/'
             }, {
                 onResponse: () => {
                     setLoading(false)
@@ -46,8 +45,7 @@ const SignUp = () => {
                     setLoading(true)
                 },
                 onSuccess: () => {
-                    setSuccess("User has been created")
-                    router.replace('/')
+                    setSuccess("Verification link has been sent to your mail")
                 },
                 onError: (ctx) => {
                     setError(ctx.error.message);
