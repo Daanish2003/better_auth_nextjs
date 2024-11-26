@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
 export const useAuthState = () => {
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false)
+    const [error, setError] = useState<string | undefined>("");
+    const [success, setSuccess] = useState<string | undefined>("");
 
   const resetState = () => {
     setError('');
