@@ -43,11 +43,9 @@ const SignIn = () => {
               resetState()
               setLoading(true)
             },
-            onSuccess: (ctx) => {
-              if (!ctx.data.twoFactorRedirect) {
+            onSuccess: () => {
                 setSuccess("LoggedIn successfully")
                 router.replace('/')
-              }
             },
             onError: (ctx) => {
               setError(ctx.error.message);
