@@ -1,4 +1,4 @@
-// components/auth/sign-in.tsx
+// components/auth/sign-up.tsx
 "use client"
 import React from 'react'
 import CardWrapper from '../card-wrapper'
@@ -8,67 +8,85 @@ import { FcGoogle } from 'react-icons/fc'
 import SocialButton from './social-button'
 import { FaGithub } from 'react-icons/fa'
 import { useAuthState } from '@/hooks/useAuthState'
-import LoginSchema from '@/helpers/zod/login-schema'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
-import { signIn } from '@/lib/auth-client'
+import { SignupSchema } from '@/helpers/zod/signup-schema'
+import { signUp } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
 
-const SignIn = () => {
+const SignUp = () => {
     const router = useRouter()
-    const { error, success, loading, setSuccess, setError, setLoading, resetState } = useAuthState();
+    const { error, success, loading, setLoading, setError, setSuccess, resetState } = useAuthState();
 
-    const form = useForm<z.infer<typeof LoginSchema>>({
-        resolver: zodResolver(LoginSchema),
+    const form = useForm<z.infer<typeof SignupSchema>>({
+        resolver: zodResolver(SignupSchema),
         defaultValues: {
+            name: '',
             email: '',
             password: '',
         }
     })
 
-    const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
+    const onSubmit = async (values: z.infer<typeof SignupSchema>) => {
         try {
-          await signIn.email({
-            email: values.email,
-            password: values.password
-          }, {
-            onResponse: () => {
-              setLoading(false)
-            },
-            onRequest: () => {
-              resetState()
-              setLoading(true)
-            },
-            onSuccess: (ctx) => {
-              if (!ctx.data.twoFactorRedirect) {
-                setSuccess("LoggedIn successfully")
-                router.replace('/')
-              }
-            },
-            onError: (ctx) => {
-              setError(ctx.error.message);
-            },
-          });
+            await signUp.email({
+                name: values.name,
+                email: values.email,
+                password: values.password,
+            }, {
+                onResponse: () => {
+                    setLoading(false)
+                },
+                onRequest: () => {
+                    resetState()
+                    setLoading(true)
+                },
+                onSuccess: () => {
+                    setSuccess("User has been created")
+                    router.replace('/')
+                },
+                onError: (ctx) => {
+                    setError(ctx.error.message);
+                },
+            });
         } catch (error) {
-          console.log(error)
-          setError("Something went wrong")
+            console.error(error)
+            setError("Something went wrong")
         }
-      }
+
+    }
 
     return (
         <CardWrapper
-            cardTitle='Sign In'
-            cardDescription='Enter your email below to login to your account'
-            cardFooterDescription="Don't have an account?"
-            cardFooterLink='/signup'
-            cardFooterLinkTitle='Sign up'
+        cardTitle='SignUp'
+        cardDescription='Create an new account'
+        cardFooterLink='/login'
+        cardFooterDescription='Already have an account?'
+        cardFooterLinkTitle='Login'
         >
             <Form {...form}>
                 <form className='space-y-4' onSubmit={form.handleSubmit(onSubmit)}>
+                <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        disabled={loading}
+                                        type="text"
+                                        placeholder='john'
+                                        {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <FormField
                         control={form.control}
                         name="email"
@@ -108,7 +126,7 @@ const SignIn = () => {
                     />
                     <FormError message={error} />
                     <FormSuccess message={success} />
-                    <Button disabled={loading} type="submit" className='w-full'>Login</Button>
+                    <Button disabled={loading} type="submit" className='w-full'>Submit</Button>
                     <div className='flex gap-x-2'>
                         <SocialButton provider="google" icon={<FcGoogle />} label="Sign in with Google" />
                         <SocialButton provider="github" icon={<FaGithub />} label="Sign in with GitHub" />
@@ -119,4 +137,4 @@ const SignIn = () => {
     )
 }
 
-export default SignIn
+export default SignUp
