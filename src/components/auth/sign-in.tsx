@@ -86,7 +86,6 @@ const SignIn = () => {
                                     />
                                 </FormControl>
                                 <FormMessage />
-                                <Link href={"/forgot-password"} className='text-xs underline ml-60'>Forgot Password?</Link>
                             </FormItem>
                         )}
                     />
@@ -105,6 +104,7 @@ const SignIn = () => {
                                     />
                                 </FormControl>
                                 <FormMessage />
+                                <Link href={"/forgot-password"} className='text-xs underline ml-60'>Forgot Password?</Link>
                             </FormItem>
 
                         )}
