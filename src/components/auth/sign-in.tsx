@@ -17,6 +17,7 @@ import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { signIn } from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 const SignIn = () => {
     const router = useRouter()
@@ -85,6 +86,7 @@ const SignIn = () => {
                                     />
                                 </FormControl>
                                 <FormMessage />
+                                <Link href={"/forgot-password"} className='text-xs underline ml-60'>Forgot Password?</Link>
                             </FormItem>
                         )}
                     />
