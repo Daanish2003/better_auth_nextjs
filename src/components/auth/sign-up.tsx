@@ -35,7 +35,7 @@ const SignUp = () => {
                 name: values.name,
                 email: values.email,
                 password: values.password,
-                callbackURL:'/'
+                callbackURL: '/'
             }, {
                 onResponse: () => {
                     setLoading(false)
@@ -60,15 +60,15 @@ const SignUp = () => {
 
     return (
         <CardWrapper
-        cardTitle='SignUp'
-        cardDescription='Create an new account'
-        cardFooterLink='/login'
-        cardFooterDescription='Already have an account?'
-        cardFooterLinkTitle='Login'
+            cardTitle='SignUp'
+            cardDescription='Create an new account'
+            cardFooterLink='/signin'
+            cardFooterDescription='Already have an account?'
+            cardFooterLinkTitle='Signin'
         >
             <Form {...form}>
                 <form className='space-y-4' onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
+                    <FormField
                         control={form.control}
                         name="name"
                         render={({ field }) => (

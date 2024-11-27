@@ -14,7 +14,7 @@ import { ForgotPasswordSchema } from '@/helpers/zod/forgot-password-schema'
 
 
 const ForgotPassword = () => {
-  const { error, success, loading, setError, setSuccess, setLoading, resetState} = useAuthState()
+  const { error, success, loading, setError, setSuccess, setLoading, resetState } = useAuthState()
 
   const form = useForm<z.infer<typeof ForgotPasswordSchema>>({
     resolver: zodResolver(ForgotPasswordSchema),
@@ -25,28 +25,28 @@ const ForgotPassword = () => {
 
   const onSubmit = async (values: z.infer<typeof ForgotPasswordSchema>) => {
     try {
-        await authClient.forgetPassword({
-            email: values.email,
-            redirectTo: "/reset-password"
-          }, {
-            onResponse: () => {
-              setLoading(false)
-            },
-            onRequest: () => {
-              resetState()
-              setLoading(true)
-            },
-            onSuccess: () => {
-              setSuccess("Reset password link has been sent")
-            },
-            onError: (ctx) => {
-              setError(ctx.error.message);
-            },
-          });
+      await authClient.forgetPassword({
+        email: values.email,
+        redirectTo: "/reset-password"
+      }, {
+        onResponse: () => {
+          setLoading(false)
+        },
+        onRequest: () => {
+          resetState()
+          setLoading(true)
+        },
+        onSuccess: () => {
+          setSuccess("Reset password link has been sent")
+        },
+        onError: (ctx) => {
+          setError(ctx.error.message);
+        },
+      });
 
     } catch (error) {
-        console.log(error)
-        setError("Something went wrong")
+      console.log(error)
+      setError("Something went wrong")
     }
   }
 
@@ -55,8 +55,8 @@ const ForgotPassword = () => {
       cardTitle='Forgot Password'
       cardDescription='Enter your email to send link to reset password'
       cardFooterDescription="Remember your password?"
-      cardFooterLink='/login'
-      cardFooterLinkTitle='Login'
+      cardFooterLink='/signin'
+      cardFooterLinkTitle='Signin'
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
