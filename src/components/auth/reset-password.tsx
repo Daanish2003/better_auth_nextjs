@@ -15,9 +15,9 @@ import { authClient } from '@/lib/auth-client'
 import { useAuthState } from '@/hooks/useAuthState'
 
 
-const ResetPassword= () => {
+const ResetPassword = () => {
     const router = useRouter()
-    const {error, success, loading, setError, setLoading, setSuccess, resetState} = useAuthState()
+    const { error, success, loading, setError, setLoading, setSuccess, resetState } = useAuthState()
 
     const form = useForm<z.infer<typeof ResetPasswordSchema>>({
         resolver: zodResolver(ResetPasswordSchema),
@@ -31,22 +31,22 @@ const ResetPassword= () => {
         try {
             await authClient.resetPassword({
                 newPassword: values.password,
-             }, {
-                 onResponse: () => {
+            }, {
+                onResponse: () => {
                     setLoading(false)
-                 },
-                 onRequest: () => {
-                     resetState()
-                     setLoading(true)
-                 },
-                 onSuccess: () => {
-                     setSuccess("New password has been created")
-                     router.replace('/signin')
-                 },
-                 onError: (ctx) => {
-                     setError(ctx.error.message);
-                 },
-             });
+                },
+                onRequest: () => {
+                    resetState()
+                    setLoading(true)
+                },
+                onSuccess: () => {
+                    setSuccess("New password has been created")
+                    router.replace('/signin')
+                },
+                onError: (ctx) => {
+                    setError(ctx.error.message);
+                },
+            });
         } catch (error) {
             console.log(error)
             setError("Something went wrong")
@@ -59,9 +59,9 @@ const ResetPassword= () => {
         <CardWrapper
             cardTitle='Reset Password'
             cardDescription='create a new password'
-            cardFooterLink='/login'
+            cardFooterLink='/signin'
             cardFooterDescription='Remember your password?'
-            cardFooterLinkTitle='Login'
+            cardFooterLinkTitle='Signin'
         >
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
