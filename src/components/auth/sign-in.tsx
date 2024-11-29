@@ -1,4 +1,3 @@
-// components/auth/sign-in.tsx
 "use client";
 
 import React from "react";
@@ -33,50 +32,88 @@ import { Button } from "../ui/button";
 
 const SignIn = () => {
     const router = useRouter();
-    const { error, success, loading, setSuccess, setError, setLoading, resetState } =
-        useAuthState();
+    const { error, success, loading, setSuccess, setError, setLoading, resetState } = useAuthState();
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
-            email: "",
+            emailOrUsername: "",
             password: "",
         },
     });
 
+    // Check if the value is an email
+    const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
     const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
+        const { emailOrUsername, password } = values;
+
+        // Determine if the input is an email or username
+        const isEmailInput = isEmail(emailOrUsername);
+
         try {
             resetState();
             setLoading(true);
 
-            await signIn.email(
-                { email: values.email, password: values.password },
-                {
-                    onRequest: () => setLoading(true),
-                    onResponse: () => setLoading(false),
-                    onSuccess: async (ctx) => {
-                        if (ctx.data.twoFactorRedirect) {
-                            const res = await requestOTP();
-                            if (res?.data) {
-                                setSuccess("OTP has been sent to your email");
-                                router.push("two-factor");
-                            } else if (res?.error) {
-                                setError(res.error.message);
+            if (isEmailInput) {
+                await signIn.email(
+                    { email: emailOrUsername, password },
+                    {
+                        onRequest: () => setLoading(true),
+                        onResponse: () => setLoading(false),
+                        onSuccess: async (ctx) => {
+                            if (ctx.data.twoFactorRedirect) {
+                                const res = await requestOTP();
+                                if (res?.data) {
+                                    setSuccess("OTP has been sent to your email");
+                                    router.push("two-factor");
+                                } else if (res?.error) {
+                                    setError(res.error.message);
+                                }
+                            } else {
+                                setSuccess("Logged in successfully");
+                                router.replace("/");
                             }
-                        } else {
-                            setSuccess("Logged in successfully");
-                            router.replace("/");
-                        }
-                    },
-                    onError: (ctx) => {
-                        const errorMessage =
-                            ctx.error.status === 403
-                                ? "Please verify your email address"
-                                : ctx.error.message;
-                        setError(errorMessage);
-                    },
-                }
-            );
+                        },
+                        onError: (ctx) => {
+                            const errorMessage =
+                                ctx.error.status === 403
+                                    ? "Please verify your email address"
+                                    : ctx.error.message;
+                            setError(errorMessage);
+                        },
+                    }
+                );
+            } else {
+                await signIn.username(
+                    { username: emailOrUsername, password },
+                    {
+                        onRequest: () => setLoading(true),
+                        onResponse: () => setLoading(false),
+                        onSuccess: async (ctx) => {
+                            if (ctx.data.twoFactorRedirect) {
+                                const res = await requestOTP();
+                                if (res?.data) {
+                                    setSuccess("OTP has been sent to your email");
+                                    router.push("two-factor");
+                                } else if (res?.error) {
+                                    setError(res.error.message);
+                                }
+                            } else {
+                                setSuccess("Logged in successfully");
+                                router.replace("/");
+                            }
+                        },
+                        onError: (ctx) => {
+                            const errorMessage =
+                                ctx.error.status === 403
+                                    ? "Please verify your email address"
+                                    : ctx.error.message;
+                            setError(errorMessage);
+                        },
+                    }
+                );
+            }
         } catch (err) {
             console.error(err);
             setError("Something went wrong. Please try again.");
@@ -88,25 +125,25 @@ const SignIn = () => {
     return (
         <CardWrapper
             cardTitle="Sign In"
-            cardDescription="Enter your email below to login to your account"
+            cardDescription="Enter your email or username below to login to your account"
             cardFooterDescription="Don't have an account?"
             cardFooterLink="/signup"
             cardFooterLinkTitle="Sign up"
         >
             <Form {...form}>
                 <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-                    {/* Email Field */}
+                    {/* Email or Username Field */}
                     <FormField
                         control={form.control}
-                        name="email"
+                        name="emailOrUsername"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>Email or Username</FormLabel>
                                 <FormControl>
                                     <Input
                                         disabled={loading}
-                                        type="email"
-                                        placeholder="example@gmail.com"
+                                        type="text"
+                                        placeholder="Enter email or username"
                                         {...field}
                                     />
                                 </FormControl>
@@ -159,5 +196,3 @@ const SignIn = () => {
 };
 
 export default SignIn;
-
-
