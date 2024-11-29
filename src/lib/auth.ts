@@ -3,7 +3,7 @@ import prisma from "@/db";
 import { resend } from "@/helpers/email/resend";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { twoFactor } from "better-auth/plugins"
+import { twoFactor, username } from "better-auth/plugins"
 
 export const auth = betterAuth({
   appName: "better_auth_nextjs",
@@ -63,6 +63,7 @@ export const auth = betterAuth({
         }
       },
       skipVerificationOnEnable: true
-    })
+    }),
+    username()
   ]
 });

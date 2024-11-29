@@ -17,6 +17,7 @@ model User {
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
   twoFactorEnabled Boolean     @default(false)
+  username         String
   Session          Session[]
   Account          Account[]
   TwoFactor        TwoFactor[]

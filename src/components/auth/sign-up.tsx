@@ -16,6 +16,7 @@ import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { SignupSchema } from '@/helpers/zod/signup-schema'
 import { signUp } from '@/lib/auth-client'
+import { generateUsername } from '@/helpers/auth/generate-username'
 
 const SignUp = () => {
     const { error, success, loading, setLoading, setError, setSuccess, resetState } = useAuthState();
@@ -26,6 +27,7 @@ const SignUp = () => {
             name: '',
             email: '',
             password: '',
+            username: '', // Added username field
         }
     })
 
@@ -35,6 +37,7 @@ const SignUp = () => {
                 name: values.name,
                 email: values.email,
                 password: values.password,
+                username: values.username,
                 callbackURL: '/'
             }, {
                 onResponse: () => {
@@ -79,7 +82,13 @@ const SignUp = () => {
                                         disabled={loading}
                                         type="text"
                                         placeholder='john'
-                                        {...field} />
+                                        {...field} 
+                                        onChange={(e) => {
+                                            field.onChange(e); // Update form state
+                                            const username = generateUsername(e.target.value);
+                                            form.setValue('username', username); // Auto-fill username
+                                        }}
+                                        />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
