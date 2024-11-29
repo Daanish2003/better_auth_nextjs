@@ -29,6 +29,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import AnonymousButton from "./anonymos-button";
 
 const SignIn = () => {
     const router = useRouter();
@@ -38,7 +39,7 @@ const SignIn = () => {
         resolver: zodResolver(LoginSchema),
         defaultValues: {
             emailOrUsername: "",
-            password: "",
+            password: ""
         },
     });
 
@@ -185,9 +186,10 @@ const SignIn = () => {
                     </Button>
 
                     {/* Social Buttons */}
-                    <div className="flex gap-x-2">
-                        <SocialButton provider="google" icon={<FcGoogle />} label="Sign in with Google" />
-                        <SocialButton provider="github" icon={<FaGithub />} label="Sign in with GitHub" />
+                    <div className="flex justify-between">
+                        <SocialButton provider="google" icon={<FcGoogle />} label="Google" />
+                        <SocialButton provider="github" icon={<FaGithub />} label="GitHub" />
+                        <AnonymousButton />
                     </div>
                 </form>
             </Form>
