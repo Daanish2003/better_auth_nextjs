@@ -17,6 +17,7 @@ import { Button } from '../ui/button'
 import { SignupSchema } from '@/helpers/zod/signup-schema'
 import { signUp } from '@/lib/auth-client'
 import { generateUsername } from '@/helpers/auth/generate-username'
+import AnonymousButton from './anonymos-button'
 
 const SignUp = () => {
     const { error, success, loading, setLoading, setError, setSuccess, resetState } = useAuthState();
@@ -134,9 +135,10 @@ const SignUp = () => {
                     <FormError message={error} />
                     <FormSuccess message={success} />
                     <Button disabled={loading} type="submit" className='w-full'>Submit</Button>
-                    <div className='flex gap-x-2'>
-                        <SocialButton provider="google" icon={<FcGoogle />} label="Sign in with Google" />
-                        <SocialButton provider="github" icon={<FaGithub />} label="Sign in with GitHub" />
+                    <div className='flex justify-between'>
+                        <SocialButton provider="google" icon={<FcGoogle />} label="Google" />
+                        <SocialButton provider="github" icon={<FaGithub />} label="GitHub" />
+                        <AnonymousButton />
                     </div>
                 </form>
             </Form>

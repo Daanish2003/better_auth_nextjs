@@ -17,7 +17,8 @@ model User {
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
   twoFactorEnabled Boolean     @default(false)
-  username         String
+  username         String?
+  isAnonymous      Boolean?
   Session          Session[]
   Account          Account[]
   TwoFactor        TwoFactor[]

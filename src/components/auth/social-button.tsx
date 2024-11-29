@@ -47,7 +47,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({
 
   return (
     <>
-      <Button variant="default" onClick={handleSignIn} disabled={loading}>
+      <Button variant="default" onClick={handleSignIn} disabled={loading} className='w-28'>
         {icon}
         {label}
       </Button>
