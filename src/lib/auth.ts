@@ -49,6 +49,12 @@ export const auth = betterAuth({
       redirectURI: process.env.BETTER_AUTH_URL + "/api/auth/callback/github",
     },
   },
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["github", "google"]
+    }
+  },
   plugins: [
     twoFactor({
       otpOptions: {
