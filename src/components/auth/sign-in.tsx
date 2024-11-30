@@ -49,8 +49,8 @@ const SignIn = () => {
     } = useAuthState();
 
     useEffect(() => {
-        oneTapCall()
-    },[])
+       oneTapCall()
+    }, [])
 
     // Infer schemas from the union
     const TraditionalSignInSchema = SignInSchema.options[0];
