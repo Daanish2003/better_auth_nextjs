@@ -3,7 +3,7 @@ import prisma from "@/db";
 import { resend } from "@/helpers/email/resend";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { anonymous, magicLink, twoFactor, username } from "better-auth/plugins"
+import { anonymous, magicLink, oneTap, twoFactor, username } from "better-auth/plugins"
 
 export const auth = betterAuth({
   appName: "better_auth_nextjs",
@@ -77,6 +77,7 @@ export const auth = betterAuth({
     username(),
     anonymous({
       emailDomainName: "example.com"
-    })
+    }),
+    oneTap()
   ]
 });
