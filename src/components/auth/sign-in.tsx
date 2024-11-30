@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -33,6 +33,7 @@ import AnonymousButton from "./anonymos-button";
 import SignInSchema from "@/helpers/zod/login-schema";
 import { Mail, Mailbox } from "lucide-react";
 import { requestOTP } from "@/helpers/auth/request-otp";
+import { oneTapCall } from "./one-tap";
 
 const SignIn = () => {
     const [signInMethod, setSignInMethod] = useState<'traditional' | 'magicLink'>('traditional');
@@ -46,6 +47,10 @@ const SignIn = () => {
         setLoading, 
         resetState 
     } = useAuthState();
+
+    useEffect(() => {
+       oneTapCall()
+    }, [])
 
     // Infer schemas from the union
     const TraditionalSignInSchema = SignInSchema.options[0];
