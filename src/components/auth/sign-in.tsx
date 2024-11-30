@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,10 +14,8 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 
 import SocialButton from "./social-button";
-import LoginSchema from "@/helpers/zod/login-schema";
 import { useAuthState } from "@/hooks/useAuthState";
 import { signIn } from "@/lib/auth-client";
-import { requestOTP } from "@/helpers/auth/request-otp";
 
 import {
     Form,
@@ -31,89 +29,129 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import AnonymousButton from "./anonymos-button";
 
-const SignIn = () => {
-    const router = useRouter();
-    const { error, success, loading, setSuccess, setError, setLoading, resetState } = useAuthState();
+// Import the schemas (adjusted to match likely export)
+import SignInSchema from "@/helpers/zod/login-schema";
+import { Mail, Mailbox } from "lucide-react";
+import { requestOTP } from "@/helpers/auth/request-otp";
 
-    const form = useForm<z.infer<typeof LoginSchema>>({
-        resolver: zodResolver(LoginSchema),
+const SignIn = () => {
+    const [signInMethod, setSignInMethod] = useState<'traditional' | 'magicLink'>('traditional');
+    const router = useRouter();
+    const { 
+        error, 
+        success, 
+        loading, 
+        setSuccess, 
+        setError, 
+        setLoading, 
+        resetState 
+    } = useAuthState();
+
+    // Infer schemas from the union
+    const TraditionalSignInSchema = SignInSchema.options[0];
+    const MagicLinkSignInSchema = SignInSchema.options[1];
+
+    // Dynamically select schema based on sign-in method
+    const currentSchema = signInMethod === 'traditional' 
+        ? TraditionalSignInSchema 
+        : MagicLinkSignInSchema;
+
+    const form = useForm<z.infer<typeof currentSchema>>({
+        resolver: zodResolver(currentSchema),
         defaultValues: {
             emailOrUsername: "",
-            password: ""
+            ...(signInMethod === 'traditional' ? { password: "" } : {}),
         },
     });
 
-    // Check if the value is an email
-    const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-
-    const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
-        const { emailOrUsername, password } = values;
-
-        // Determine if the input is an email or username
-        const isEmailInput = isEmail(emailOrUsername);
+    const onSubmit = async (values: z.infer<typeof currentSchema>) => {
+        resetState();
+        setLoading(true);
 
         try {
-            resetState();
-            setLoading(true);
-
-            if (isEmailInput) {
-                await signIn.email(
-                    { email: emailOrUsername, password },
+            if (signInMethod === 'magicLink') {
+                // Magic Link sign-in
+                await signIn.magicLink(
+                    { email: values.emailOrUsername },
                     {
                         onRequest: () => setLoading(true),
                         onResponse: () => setLoading(false),
-                        onSuccess: async (ctx) => {
-                            if (ctx.data.twoFactorRedirect) {
-                                const res = await requestOTP();
-                                if (res?.data) {
-                                    setSuccess("OTP has been sent to your email");
-                                    router.push("two-factor");
-                                } else if (res?.error) {
-                                    setError(res.error.message);
-                                }
-                            } else {
-                                setSuccess("Logged in successfully");
-                                router.replace("/");
-                            }
+                        onSuccess: () => {
+                            setSuccess("A magic link has been sent to your email.");
                         },
                         onError: (ctx) => {
-                            const errorMessage =
-                                ctx.error.status === 403
-                                    ? "Please verify your email address"
-                                    : ctx.error.message;
-                            setError(errorMessage);
+                            setError(ctx.error.message || "Failed to send magic link.");
                         },
                     }
                 );
             } else {
-                await signIn.username(
-                    { username: emailOrUsername, password },
-                    {
-                        onRequest: () => setLoading(true),
-                        onResponse: () => setLoading(false),
-                        onSuccess: async (ctx) => {
-                            if (ctx.data.twoFactorRedirect) {
-                                const res = await requestOTP();
-                                if (res?.data) {
-                                    setSuccess("OTP has been sent to your email");
-                                    router.push("two-factor");
-                                } else if (res?.error) {
-                                    setError(res.error.message);
+                // Traditional sign-in
+                const signInValues = values as z.infer<typeof TraditionalSignInSchema>;
+                
+                // Determine if input is email or username
+                const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signInValues.emailOrUsername);
+                
+                if (isEmail) {
+                    await signIn.email(
+                        { 
+                            email: signInValues.emailOrUsername, 
+                            password: signInValues.password 
+                        },
+                        {
+                            onRequest: () => setLoading(true),
+                            onResponse: () => setLoading(false),
+                            onSuccess: async(ctx) => {
+                                if(ctx.data.twoFactorRedirect) {
+                                    const response = await requestOTP()
+                                    if(response?.data) {
+                                        setSuccess("OTP has been sent to your email")
+                                        router.push("/two-factor")
+                                    } else if (response?.error) {
+                                        setError(response.error.message)
+                                    }
+                                } else {
+                                    setSuccess("Logged in successfully.");
+                                    router.replace("/");
                                 }
-                            } else {
-                                setSuccess("Logged in successfully");
-                                router.replace("/");
-                            }
+                            },
+                            onError: (ctx) => {
+                                setError(
+                                    ctx.error.message || "Email login failed. Please try again."
+                                );
+                            },
+                        }
+                    );
+                } else {
+                    await signIn.username(
+                        { 
+                            username: signInValues.emailOrUsername, 
+                            password: signInValues.password 
                         },
-                        onError: (ctx) => {
-                            const errorMessage =
-                                ctx.error.status === 403
-                                    ? "Please verify your email address"
-                                    : ctx.error.message;
-                            setError(errorMessage);
-                        },
-                    }
-                );
+                        {
+                            onRequest: () => setLoading(true),
+                            onResponse: () => setLoading(false),
+                            onSuccess: async(ctx) => {
+                                if(ctx.data.twoFactorRedirect) {
+                                    const response = await requestOTP()
+                                    if(response?.data) {
+                                        setSuccess("OTP has been sent to your email")
+                                        router.push("/two-factor")
+                                    } else if (response?.error) {
+                                        setError(response.error.message)
+                                    }
+                                } else {
+                                    setSuccess("Logged in successfully.");
+                                    router.replace("/");
+                                }
+                            },
+                            onError: (ctx) => {
+                                setError(
+                                    ctx.error.message || "Username login failed. Please try again."
+                                );
+                            },
+                        }
+                    );
+                }
             }
         } catch (err) {
             console.error(err);
@@ -126,7 +164,7 @@ const SignIn = () => {
     return (
         <CardWrapper
             cardTitle="Sign In"
-            cardDescription="Enter your email or username below to login to your account"
+            cardDescription="Enter your details below to login to your account"
             cardFooterDescription="Don't have an account?"
             cardFooterLink="/signup"
             cardFooterLinkTitle="Sign up"
@@ -139,12 +177,18 @@ const SignIn = () => {
                         name="emailOrUsername"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email or Username</FormLabel>
+                                <FormLabel>
+                                    {signInMethod === 'magicLink' ? 'Email' : 'Email or Username'}
+                                </FormLabel>
                                 <FormControl>
                                     <Input
                                         disabled={loading}
                                         type="text"
-                                        placeholder="Enter email or username"
+                                        placeholder={
+                                            signInMethod === 'magicLink'
+                                                ? "Enter your email"
+                                                : "Enter email or username"
+                                        }
                                         {...field}
                                     />
                                 </FormControl>
@@ -153,28 +197,33 @@ const SignIn = () => {
                         )}
                     />
 
-                    {/* Password Field */}
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Password</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        disabled={loading}
-                                        type="password"
-                                        placeholder="********"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                                <Link href="/forgot-password" className="text-xs underline ml-60">
-                                    Forgot Password?
-                                </Link>
-                            </FormItem>
-                        )}
-                    />
+                    {/* Password Field (only for traditional sign-in) */}
+                    {signInMethod === 'traditional' && (
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            disabled={loading}
+                                            type="password"
+                                            placeholder="********"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                    <Link
+                                        href="/forgot-password"
+                                        className="text-xs underline ml-60"
+                                    >
+                                        Forgot Password?
+                                    </Link>
+                                </FormItem>
+                            )}
+                        />
+                    )}
 
                     {/* Error & Success Messages */}
                     <FormError message={error} />
@@ -182,13 +231,28 @@ const SignIn = () => {
 
                     {/* Submit Button */}
                     <Button disabled={loading} type="submit" className="w-full">
-                        Login
+                        {signInMethod === 'magicLink' ? "Send Magic Link" : "Login"}
                     </Button>
 
                     {/* Social Buttons */}
-                    <div className="flex justify-between">
-                        <SocialButton provider="google" icon={<FcGoogle />} label="Google" />
-                        <SocialButton provider="github" icon={<FaGithub />} label="GitHub" />
+                    <div className="flex justify-between mt-4">
+                        <SocialButton provider="google" icon={<FcGoogle />} label="" />
+                        <SocialButton provider="github" icon={<FaGithub />} label="" />
+                        <Button
+                            type="button"
+                            className="w-20"
+                            onClick={() => setSignInMethod(
+                                signInMethod === 'traditional' ? 'magicLink' : 'traditional'
+                            )}
+                        >
+                            {signInMethod === 'traditional'
+                                ? (
+                                    <Mailbox />
+                                )
+                                : (
+                                   <Mail />
+                                )}
+                        </Button>
                         <AnonymousButton />
                     </div>
                 </form>

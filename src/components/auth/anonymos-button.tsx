@@ -33,9 +33,8 @@ const AnonymousButton = () => {
         
     }
   return (
-    <Button className='w-28' onClick={handleSignInAnonymous}>
+    <Button className='w-20' onClick={handleSignInAnonymous}>
         <User />
-        Guest
     </Button>
   )
 }

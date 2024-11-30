@@ -1,6 +1,6 @@
 // src/lib/auth-client.ts
 import { twoFactorClient } from "better-auth/plugins";
-import { anonymousClient, usernameClient } from "better-auth/client/plugins"
+import { anonymousClient, magicLinkClient, usernameClient } from "better-auth/client/plugins"
 import { createAuthClient } from "better-auth/react";
 
 
@@ -9,7 +9,8 @@ export const authClient = createAuthClient({
     plugins: [
         twoFactorClient(),
         usernameClient(),
-        anonymousClient()
+        anonymousClient(),
+        magicLinkClient()
     ]
 })
 

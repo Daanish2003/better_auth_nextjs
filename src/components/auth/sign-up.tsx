@@ -136,8 +136,8 @@ const SignUp = () => {
                     <FormSuccess message={success} />
                     <Button disabled={loading} type="submit" className='w-full'>Submit</Button>
                     <div className='flex justify-between'>
-                        <SocialButton provider="google" icon={<FcGoogle />} label="Google" />
-                        <SocialButton provider="github" icon={<FaGithub />} label="GitHub" />
+                        <SocialButton provider="google" icon={<FcGoogle />} label="" />
+                        <SocialButton provider="github" icon={<FaGithub />} label="" />
                         <AnonymousButton />
                     </div>
                 </form>
