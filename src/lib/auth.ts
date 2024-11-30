@@ -3,7 +3,7 @@ import prisma from "@/db";
 import { resend } from "@/helpers/email/resend";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { anonymous, twoFactor, username } from "better-auth/plugins"
+import { anonymous, magicLink, twoFactor, username } from "better-auth/plugins"
 
 export const auth = betterAuth({
   appName: "better_auth_nextjs",
@@ -63,6 +63,16 @@ export const auth = betterAuth({
         }
       },
       skipVerificationOnEnable: true
+    }),
+    magicLink({
+      sendMagicLink: async ({email, url}) => {
+        await resend.emails.send({
+          from: "Acme <onboarding@resend.dev>",
+          to: email,
+          subject: "Magic Link",
+          html: `Click the link to login into your account: ${url}`,
+        });
+      }
     }),
     username(),
     anonymous({
