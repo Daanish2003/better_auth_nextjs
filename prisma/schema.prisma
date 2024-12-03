@@ -22,6 +22,7 @@ model User {
   Session          Session[]
   Account          Account[]
   TwoFactor        TwoFactor[]
+  Passkey          Passkey[]
 
   @@unique([email])
   @@map("user")
@@ -81,4 +82,19 @@ model TwoFactor {
   user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("twoFactor")
+}
+
+model Passkey {
+  id             String   @id @default(cuid()) // Unique identifier for each passkey
+  name           String? // The name of the passkey
+  publicKey      String // The public key of the passkey
+  userId         String // The id of the user
+  webauthnUserID String // The user id for WebAuthn
+  counter        Int // The counter of the passkey
+  deviceType     String // The type of device used to register the passkey
+  backedUp       Boolean // Whether the passkey is backed up
+  transports     String // The transports used to register the passkey
+  createdAt      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) // Foreign key relation with User model
 }
