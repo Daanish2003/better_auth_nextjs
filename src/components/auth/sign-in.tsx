@@ -34,6 +34,7 @@ import SignInSchema from "@/helpers/zod/login-schema";
 import { Mail, Mailbox } from "lucide-react";
 import { requestOTP } from "@/helpers/auth/request-otp";
 import { oneTapCall } from "./one-tap";
+import { PasskeyButton } from "./passkey-button";
 
 const SignIn = () => {
     const [signInMethod, setSignInMethod] = useState<'traditional' | 'magicLink'>('traditional');
@@ -260,6 +261,7 @@ const SignIn = () => {
                         </Button>
                         <AnonymousButton />
                     </div>
+                    <PasskeyButton />
                 </form>
             </Form>
         </CardWrapper>
